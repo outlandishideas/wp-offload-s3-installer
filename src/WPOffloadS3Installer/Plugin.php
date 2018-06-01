@@ -1,4 +1,4 @@
-<?php namespace PhilippBaschke\ACFProInstaller;
+<?php namespace Outlandish\WPOffloadS3Installer;
 
 use Composer\Composer;
 use Composer\DependencyResolver\Operation\OperationInterface;
@@ -10,16 +10,16 @@ use Composer\Plugin\PluginEvents;
 use Composer\Plugin\PluginInterface;
 use Composer\Plugin\PreFileDownloadEvent;
 use Dotenv\Dotenv;
-use PhilippBaschke\ACFProInstaller\Exceptions\MissingKeyException;
+use Outlandish\WPOffloadS3Installer\Exceptions\MissingKeyException;
 
 /**
- * A composer plugin that makes installing ACF PRO possible
+ * A composer plugin that makes installing WP Offload S3 possible
  *
- * The WordPress plugin Advanced Custom Fields PRO (ACF PRO) does not
+ * The WordPress plugin WP Offload S3 does not
  * offer a way to install it via composer natively.
  *
  * This plugin uses a 'package' repository (user supplied) that downloads the
- * correct version from the ACF site using the version number from
+ * correct version from the DeliciousBrains site using the version number from
  * that repository and a license key from the ENVIRONMENT or an .env file.
  *
  * With this plugin user no longer need to expose their license key in
@@ -29,21 +29,21 @@ class Plugin implements PluginInterface, EventSubscriberInterface
 {
     /**
      * The name of the environment variable
-     * where the ACF PRO key should be stored.
+     * where the WP Offload S3 key should be stored.
      */
-    const KEY_ENV_VARIABLE = 'ACF_PRO_KEY';
+    const KEY_ENV_VARIABLE = 'WP_OFFLOAD_S3_KEY';
 
     /**
-     * The name of the ACF PRO package
+     * The name of the WP Offload S3 package
      */
-    const ACF_PRO_PACKAGE_NAME =
-    'advanced-custom-fields/advanced-custom-fields-pro';
+    const WP_OFFLOAD_S3_PACKAGE_NAME =
+    'deliciousbrains-plugin/wp-offload-s3';
 
     /**
-     * The url where ACF PRO can be downloaded (without version and key)
+     * The url where WP Offload S3 can be downloaded (without version and key)
      */
-    const ACF_PRO_PACKAGE_URL =
-    'https://connect.advancedcustomfields.com/index.php?p=pro&a=download';
+    const WP_OFFLOAD_S3_PACKAGE_URL =
+    'https://composer.deliciousbrains.com/';
 
     /**
      * @access protected
@@ -111,8 +111,8 @@ class Plugin implements PluginInterface, EventSubscriberInterface
     {
         $package = $this->getPackageFromOperation($event->getOperation());
 
-        if ($package->getName() === self::ACF_PRO_PACKAGE_NAME) {
-            $version = $this->validateVersion($package->getPrettyVersion());
+        if ($package->getName() === self::WP_OFFLOAD_S3_PACKAGE_NAME) {
+            $version = $package->getPrettyVersion();
             $package->setDistUrl(
                 $this->addParameterToUrl($package->getDistUrl(), 't', $version)
             );
@@ -125,7 +125,7 @@ class Plugin implements PluginInterface, EventSubscriberInterface
      *
      * The key is not added to the package because it would show up in the
      * composer.lock file in this case. A custom file system is used to
-     * swap out the ACF PRO url with a url that contains the key.
+     * swap out the WP Offload S3 url with a url that contains the key.
      *
      * @access public
      * @param PreFileDownloadEvent $event The event that called this method
@@ -135,20 +135,17 @@ class Plugin implements PluginInterface, EventSubscriberInterface
     {
         $processedUrl = $event->getProcessedUrl();
 
-        if ($this->isAcfProPackageUrl($processedUrl)) {
+        if ($this->isWPOffloadS3PackageUrl($processedUrl)) {
             $rfs = $event->getRemoteFilesystem();
-            $acfRfs = new RemoteFilesystem(
-                $this->addParameterToUrl(
-                    $processedUrl,
-                    'k',
-                    $this->getKeyFromEnv()
-                ),
+            $processedUrl = $processedUrl . '/' . $this->getKeyFromEnv();
+            $wpOffloadS3Rfs = new RemoteFilesystem(
+                $processedUrl,
                 $this->io,
                 $this->composer->getConfig(),
                 $rfs->getOptions(),
                 $rfs->isTlsDisabled()
             );
-            $event->setRemoteFilesystem($acfRfs);
+            $event->setRemoteFilesystem($wpOffloadS3Rfs);
         }
     }
 
@@ -170,47 +167,19 @@ class Plugin implements PluginInterface, EventSubscriberInterface
     }
 
     /**
-     * Validate that the version is an exact major.minor.patch.optional version
-     *
-     * The url to download the code for the package only works with exact
-     * version numbers with 3 or 4 digits: e.g. 1.2.3 or 1.2.3.4
-     *
-     * @access protected
-     * @param string $version The version that should be validated
-     * @return string The valid version
-     * @throws UnexpectedValueException
-     */
-    protected function validateVersion($version)
-    {
-        // \A = start of string, \Z = end of string
-        // See: http://stackoverflow.com/a/34994075
-        $major_minor_patch_optional = '/\A\d\.\d\.\d{1,2}(?:\.\d)?\Z/';
-
-        if (!preg_match($major_minor_patch_optional, $version)) {
-            throw new \UnexpectedValueException(
-                'The version constraint of ' . self::ACF_PRO_PACKAGE_NAME .
-                ' should be exact (with 3 or 4 digits). ' .
-                'Invalid version string "' . $version . '"'
-            );
-        }
-
-        return $version;
-    }
-
-    /**
-     * Test if the given url is the ACF PRO download url
+     * Test if the given url is the WP Offload S3 download url
      *
      * @access protected
      * @param string The url that should be checked
      * @return bool
      */
-    protected function isAcfProPackageUrl($url)
+    protected function isWPOffloadS3PackageUrl($url)
     {
-        return strpos($url, self::ACF_PRO_PACKAGE_URL) !== false;
+        return strpos($url, self::WP_OFFLOAD_S3_PACKAGE_URL) !== false;
     }
 
     /**
-     * Get the ACF PRO key from the environment
+     * Get the WP Offload S3 key from the environment
      *
      * Loads the .env file that is in the same directory as composer.json
      * and gets the key from the environment variable KEY_ENV_VARIABLE.
@@ -219,7 +188,7 @@ class Plugin implements PluginInterface, EventSubscriberInterface
      *
      * @access protected
      * @return string The key from the environment
-     * @throws PhilippBaschke\ACFProInstaller\Exceptions\MissingKeyException
+     * @throws MissingKeyException
      */
     protected function getKeyFromEnv()
     {

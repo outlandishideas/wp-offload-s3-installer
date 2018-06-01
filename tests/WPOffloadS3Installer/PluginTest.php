@@ -1,16 +1,16 @@
-<?php namespace PhilippBaschke\ACFProInstaller\Test;
+<?php namespace Outlandish\WPOffloadS3Installer\Test;
 
 use Composer\Installer\PackageEvents;
 use Composer\Plugin\PluginEvents;
-use PhilippBaschke\ACFProInstaller\Plugin;
+use Outlandish\WPOffloadS3Installer\Plugin;
 
 class PluginTest extends \PHPUnit_Framework_TestCase
 {
-    const REPO_NAME = 'advanced-custom-fields/advanced-custom-fields-pro';
+    const REPO_NAME = 'deliciousbrains-plugin/wp-offload-s3';
     const REPO_TYPE = 'wordpress-plugin';
     const REPO_URL =
-      'https://connect.advancedcustomfields.com/index.php?p=pro&a=download';
-    const KEY_ENV_VARIABLE = 'ACF_PRO_KEY';
+      'https://composer.deliciousbrains.com/';
+    const KEY_ENV_VARIABLE = 'WP_OFFLOAD_S3_KEY';
 
     protected function tearDown()
     {
@@ -449,16 +449,6 @@ class PluginTest extends \PHPUnit_Framework_TestCase
         $plugin->addVersion($packageEvent);
     }
 
-    public function testExactVersionWith2DigitsFailsValidation()
-    {
-        $this->versionFailsValidationHelper('1.2');
-    }
-
-    public function testExactVersionWith1DigitsFailsValidation()
-    {
-        $this->versionFailsValidationHelper('1');
-    }
-
     public function testDontAddVersionTwice()
     {
         // The version that should be required
@@ -768,8 +758,8 @@ class PluginTest extends \PHPUnit_Framework_TestCase
             ->with($this->callback(
                 function ($rfs) use ($key) {
                     $this->assertAttributeContains(
-                        "&k=$key",
-                        'acfFileUrl',
+                        $key,
+                        'wpOffloadS3FileUrl',
                         $rfs
                     );
                     return true;
@@ -858,8 +848,8 @@ class PluginTest extends \PHPUnit_Framework_TestCase
             ->with($this->callback(
                 function ($rfs) use ($key) {
                     $this->assertAttributeContains(
-                        "&k=$key",
-                        'acfFileUrl',
+                        $key,
+                        'wpOffloadS3FileUrl',
                         $rfs
                     );
                     return true;
@@ -952,8 +942,8 @@ class PluginTest extends \PHPUnit_Framework_TestCase
             ->with($this->callback(
                 function ($rfs) use ($key) {
                     $this->assertAttributeContains(
-                        "&k=$key",
-                        'acfFileUrl',
+                        $key,
+                        'wpOffloadS3FileUrl',
                         $rfs
                     );
                     return true;
@@ -970,8 +960,8 @@ class PluginTest extends \PHPUnit_Framework_TestCase
     {
         // Expect an Exception
         $this->setExpectedException(
-            'PhilippBaschke\ACFProInstaller\Exceptions\MissingKeyException',
-            'ACF_PRO_KEY'
+            'Outlandish\WPOffloadS3Installer\Exceptions\MissingKeyException',
+            'WP_OFFLOAD_S3_KEY'
         );
 
         // Mock a RemoteFilesystem
@@ -1005,7 +995,7 @@ class PluginTest extends \PHPUnit_Framework_TestCase
         $plugin->addKey($event);
     }
 
-    public function testOnlyAddKeyOnAcfUrl()
+    public function testOnlyAddKeyOnWpOffloadS3Url()
     {
         // Make key available in the ENVIRONMENT
         putenv(self::KEY_ENV_VARIABLE . '=KEY');

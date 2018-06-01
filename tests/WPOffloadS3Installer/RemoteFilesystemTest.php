@@ -1,6 +1,6 @@
-<?php namespace PhilippBaschke\ACFProInstaller\Test;
+<?php namespace Outlandish\WPOffloadS3Installer\Test;
 
-use PhilippBaschke\ACFProInstaller\RemoteFilesystem;
+use Outlandish\WPOffloadS3Installer\RemoteFilesystem;
 
 class RemoteFilesystemTest extends \PHPUnit_Framework_TestCase
 {
@@ -21,10 +21,10 @@ class RemoteFilesystemTest extends \PHPUnit_Framework_TestCase
     }
 
     // Inspired by testCopy of Composer
-    public function testCopyUsesAcfFileUrl()
+    public function testCopyUsesWpOffloadS3FileUrl()
     {
-        $acfFileUrl = 'file://'.__FILE__;
-        $rfs = new RemoteFilesystem($acfFileUrl, $this->io);
+        $wpOffloadS3FileUrl = 'file://'.__FILE__;
+        $rfs = new RemoteFilesystem($wpOffloadS3FileUrl, $this->io);
         $file = tempnam(sys_get_temp_dir(), 'pb');
 
         $this->assertTrue(

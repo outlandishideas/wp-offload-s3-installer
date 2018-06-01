@@ -1,10 +1,10 @@
-<?php namespace PhilippBaschke\ACFProInstaller;
+<?php namespace Outlandish\WPOffloadS3Installer;
 
 use Composer\Config;
 use Composer\IO\IOInterface;
 
 /**
- * A composer remote filesystem for ACF PRO
+ * A composer remote filesystem for WP Offload S3
  *
  * Makes it possible to copy files from a modified file url
  */
@@ -16,33 +16,33 @@ class RemoteFilesystem extends \Composer\Util\RemoteFilesystem
      * @access protected
      * @var string
      */
-    protected $acfFileUrl;
+    protected $wpOffloadS3FileUrl;
 
      /**
      * Constructor
      *
      * @access public
-     * @param string $acfFileUrl The url that should be used instead of fileurl
+     * @param string $wpOffloadS3FileUrl The url that should be used instead of fileurl
      * @param IOInterface $io The IO instance
      * @param Config $config The config
      * @param array $options The options
      * @param bool $disableTls
      */
     public function __construct(
-        $acfFileUrl,
+        $wpOffloadS3FileUrl,
         IOInterface $io,
         Config $config = null,
         array $options = [],
         $disableTls = false
     ) {
-        $this->acfFileUrl = $acfFileUrl;
+        $this->wpOffloadS3FileUrl = $wpOffloadS3FileUrl;
         parent::__construct($io, $config, $options, $disableTls);
     }
 
      /**
      * Copy the remote file in local
      *
-     * Use $acfFileUrl instead of the provided $fileUrl
+     * Use $wpOffloadS3FileUrl instead of the provided $fileUrl
      *
      * @param string $originUrl The origin URL
      * @param string $fileUrl   The file URL (ignored)
@@ -61,7 +61,7 @@ class RemoteFilesystem extends \Composer\Util\RemoteFilesystem
     ) {
         return parent::copy(
             $originUrl,
-            $this->acfFileUrl,
+            $this->wpOffloadS3FileUrl,
             $fileName,
             $progress,
             $options
