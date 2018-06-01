@@ -1,5 +1,5 @@
 {
-  "name": "outlandishideas/wp-offload-s3-installer",
+  "name": "outlandish/wp-offload-s3-installer",
   "description": "An install helper for WP Offload S3",
   "type": "composer-plugin",
   "license": "MIT",
